@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Connections</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'base.html' %}
+    
+    <div class="container">
+        <div class="results-header">
+            <h1>My Connection Requests</h1>
+            <p>Manage your outgoing connection requests with project owners</p>
+        </div>
+        
+        {% if connections %}
+            <ul class="connections-list">
+                {% for connection in connections %}
+                    <li class="connection-item">
+                        <div class="connection-header">
+                            <h3>Request to Project #{{ connection.project_id }}</h3>
+                            <span class="connection-status {{ connection.status }}">{{ connection.status }}</span>
+                        </div>
+                        <div class="connection-content">
+                            <div class="connection-message">
+                                <h4>Your Message:</h4>
+                                <p>{{ connection.message or "No message provided" }}</p>
+                            </div>
+                            <div class="connection-actions">
+                                <button class="action-button primary-button">View Project</button>
+                                <button class="action-button secondary-button">Cancel Request</button>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-handshake"></i>
+                <h3>No Connection Requests</h3>
+                <p>You haven't sent any connection requests yet. Find projects and connect with their owners!</p>
+                <a href="{{ url_for('register_project') }}" class="action-button primary-button">Find Projects</a>
+            </div>
+        {% endif %}
+        
+        <div class="action-buttons">
+            <a href="{{ url_for('my_projects') }}" class="action-button secondary-button">View Saved Projects</a>
+            <a href="{{ url_for('register_project') }}" class="action-button primary-button">Find More Projects</a>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2023 Project Matcher. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Any JavaScript specific to this page would go here
+        });
+    </script>
+</body>
+</html>

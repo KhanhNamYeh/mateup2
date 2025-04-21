@@ -1,0 +1,307 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "John Smith",
+      "email": "john@example.com",
+      "password_hash": "pbkdf2:sha256:150000$abc123",
+      "created_at": "2025-04-15T10:30:00Z",
+      "projects": [
+        2,
+        5
+      ],
+      "saved_projects": [
+        3,
+        7
+      ],
+      "connections": [
+        {
+          "connection_id": 1,
+          "status": "accepted"
+        },
+        {
+          "connection_id": 4,
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "password_hash": "pbkdf2:sha256:150000$xyz789",
+      "created_at": "2025-04-16T14:20:00Z",
+      "projects": [
+        1,
+        3
+      ],
+      "saved_projects": [
+        5,
+        6
+      ],
+      "connections": [
+        {
+          "connection_id": 2,
+          "status": "pending"
+        },
+        {
+          "connection_id": 3,
+          "status": "rejected"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "abc",
+      "email": "abc123@gmail.com",
+      "password_hash": "scrypt:32768:8:1$XXHwhKTMIAWqVnEg$490d5d578e34db0a4eea8c9ea02bfd6db66e5d98f46e9b6956eace59774fd0cc14b5c0ec8e7b06ade3e940e734dcb3d4b984c522f66e3856f1d809c9db5262ff",
+      "created_at": "2025-04-21T14:28:17.159726",
+      "projects": [
+        9,
+        10,
+        11
+      ],
+      "saved_projects": [],
+      "connections": []
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "owner_id": 2,
+      "name": "AI Startup",
+      "kind": "Tech",
+      "country": "USA",
+      "idea": "AI for healthcare analytics and patient monitoring",
+      "partner": "Investors with healthcare experience",
+      "created_at": "2025-04-16T15:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "owner_id": 1,
+      "name": "Fintech App",
+      "kind": "Tech",
+      "country": "Canada",
+      "idea": "Personal finance management for students",
+      "partner": "Developers with financial background",
+      "created_at": "2025-04-15T11:30:00Z",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "owner_id": 2,
+      "name": "Art Gallery",
+      "kind": "Art",
+      "country": "USA",
+      "idea": "Showcasing local artists and contemporary pieces",
+      "partner": "Artists and marketing specialists",
+      "created_at": "2025-04-17T09:45:00Z",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "owner_id": 3,
+      "name": "E-commerce Platform",
+      "kind": "Tech",
+      "country": "USA",
+      "idea": "Online shopping for sustainable products",
+      "partner": "Sellers with eco-friendly products",
+      "created_at": "2025-04-18T16:20:00Z",
+      "status": "active"
+    },
+    {
+      "id": 5,
+      "owner_id": 1,
+      "name": "Learning Platform",
+      "kind": "Education",
+      "country": "UK",
+      "idea": "Interactive coding lessons for children",
+      "partner": "Developers and educators",
+      "created_at": "2025-04-19T13:10:00Z",
+      "status": "active"
+    },
+    {
+      "id": 6,
+      "owner_id": 4,
+      "name": "Medical App",
+      "kind": "Healthcare",
+      "country": "Germany",
+      "idea": "Remote patient monitoring system",
+      "partner": "Healthcare professionals and investors",
+      "created_at": "2025-04-20T10:30:00Z",
+      "status": "active"
+    },
+    {
+      "id": 7,
+      "owner_id": 5,
+      "name": "IoT Startup",
+      "kind": "Tech",
+      "country": "France",
+      "idea": "Smart home solutions and automation",
+      "partner": "Hardware engineers and designers",
+      "created_at": "2025-04-20T14:15:00Z",
+      "status": "active"
+    },
+    {
+      "id": 8,
+      "owner_id": 6,
+      "name": "Food Delivery",
+      "kind": "Food",
+      "country": "Italy",
+      "idea": "Connecting local restaurants with customers",
+      "partner": "Restaurant owners and delivery network",
+      "created_at": "2025-04-21T09:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": 9,
+      "owner_id": 3,
+      "name": "AI Startup",
+      "kind": "Art",
+      "country": "USA",
+      "idea": "coooooooooool",
+      "partner": "colllll",
+      "created_at": "2025-04-21T14:29:08.809687",
+      "status": "active"
+    },
+    {
+      "id": 10,
+      "owner_id": 3,
+      "name": "AI Startup",
+      "kind": "Hardware",
+      "country": "USA",
+      "idea": "abc",
+      "partner": "abac",
+      "created_at": "2025-04-21T14:32:29.570486",
+      "status": "active"
+    },
+    {
+      "id": 11,
+      "owner_id": 3,
+      "name": "AI Startup",
+      "kind": "Hardware",
+      "country": "USA",
+      "idea": "abc",
+      "partner": "abc",
+      "created_at": "2025-04-21T15:51:20.135433",
+      "status": "active"
+    }
+  ],
+  "connections": [
+    {
+      "id": 1,
+      "from_user_id": 1,
+      "to_project_id": 3,
+      "to_user_id": 2,
+      "message": "I'm interested in collaborating on your art gallery project. I have experience in marketing local artists.",
+      "status": "accepted",
+      "created_at": "2025-04-17T14:30:00Z",
+      "updated_at": "2025-04-18T09:15:00Z"
+    },
+    {
+      "id": 2,
+      "from_user_id": 2,
+      "to_project_id": 5,
+      "to_user_id": 1,
+      "message": "I'd love to work on your learning platform. I have a background in education and software development.",
+      "status": "pending",
+      "created_at": "2025-04-19T16:45:00Z",
+      "updated_at": "2025-04-19T16:45:00Z"
+    },
+    {
+      "id": 3,
+      "from_user_id": 3,
+      "to_project_id": 3,
+      "to_user_id": 2,
+      "message": "I'm a local artist looking to showcase my work. Would love to connect!",
+      "status": "rejected",
+      "created_at": "2025-04-18T11:20:00Z",
+      "updated_at": "2025-04-19T10:30:00Z",
+      "from_user": {
+        "id": 3,
+        "name": "abc",
+        "email": "abc123@gmail.com",
+        "password_hash": "scrypt:32768:8:1$XXHwhKTMIAWqVnEg$490d5d578e34db0a4eea8c9ea02bfd6db66e5d98f46e9b6956eace59774fd0cc14b5c0ec8e7b06ade3e940e734dcb3d4b984c522f66e3856f1d809c9db5262ff",
+        "created_at": "2025-04-21T14:28:17.159726",
+        "projects": [
+          9,
+          10,
+          11
+        ],
+        "saved_projects": [],
+        "connections": []
+      },
+      "to_user": {
+        "id": 2,
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "password_hash": "pbkdf2:sha256:150000$xyz789",
+        "created_at": "2025-04-16T14:20:00Z",
+        "projects": [
+          1,
+          3
+        ],
+        "saved_projects": [
+          5,
+          6
+        ],
+        "connections": [
+          {
+            "connection_id": 2,
+            "status": "pending"
+          },
+          {
+            "connection_id": 3,
+            "status": "rejected"
+          }
+        ]
+      },
+      "project": {
+        "id": 3,
+        "owner_id": 2,
+        "name": "Art Gallery",
+        "kind": "Art",
+        "country": "USA",
+        "idea": "Showcasing local artists and contemporary pieces",
+        "partner": "Artists and marketing specialists",
+        "created_at": "2025-04-17T09:45:00Z",
+        "status": "active"
+      }
+    },
+    {
+      "id": 4,
+      "from_user_id": 4,
+      "to_project_id": 2,
+      "to_user_id": 1,
+      "message": "I have experience developing fintech applications. Let's discuss your project!",
+      "status": "pending",
+      "created_at": "2025-04-20T15:10:00Z",
+      "updated_at": "2025-04-20T15:10:00Z"
+    }
+  ],
+  "categories": [
+    "Tech",
+    "Art",
+    "Education",
+    "Healthcare",
+    "Food",
+    "Business",
+    "Entertainment",
+    "Social",
+    "Environment",
+    "Sports"
+  ],
+  "countries": [
+    "USA",
+    "Canada",
+    "UK",
+    "Germany",
+    "France",
+    "Italy",
+    "Japan",
+    "Australia",
+    "Brazil",
+    "India"
+  ]
+}

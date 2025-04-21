@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Project Matcher{% endblock %}
+
+{% block content %}
+<div class="hero container">
+    <div class="hero-content">
+        <h1>Find the Perfect Project Partner</h1>
+        <p>Register your project idea and connect with like-minded collaborators</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('register_project') }}" class="btn btn-primary">Register a Project</a>
+        </div>
+    </div>
+</div>
+
+<section class="features container">
+    <div class="feature">
+        <i class="fas fa-project-diagram"></i>
+        <h2>Share Your Ideas</h2>
+        <p>Describe your project and what you're looking for in a partner</p>
+    </div>
+    <div class="feature">
+        <i class="fas fa-search"></i>
+        <h2>Find Similar Projects</h2>
+        <p>Our matching algorithm finds projects that align with your interests</p>
+    </div>
+    <div class="feature">
+        <i class="fas fa-handshake"></i>
+        <h2>Connect &amp; Collaborate</h2>
+        <p>Reach out to potential partners and start collaborating</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Login modal functionality
+    const loginBtn = document.querySelector('.login-btn');
+    const registerBtn = document.querySelector('.register-btn');
+    
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLoginModal();
+        });
+    }
+    
+    if (registerBtn) {
+        registerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showRegisterModal();
+        });
+    }
+    
+    function showLoginModal() {
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Login</h2>
+                <form action="{{ url_for('login_page') }}" method="POST">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <p>Don't have an account? <a href="#" class="register-link">Register</a></p>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Close button functionality
+        modal.querySelector('.close').addEventListener('click', function() {
+            document.body.removeChild(modal);
+        });
+        
+        // Switch to register modal
+        modal.querySelector('.register-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.removeChild(modal);
+            showRegisterModal();
+        });
+    }
+    
+    function showRegisterModal() {
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Register</h2>
+                <form action="{{ url_for('register_user') }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+                <p>Already have an account? <a href="#" class="login-link">Login</a></p>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Close button functionality
+        modal.querySelector('.close').addEventListener('click', function() {
+            document.body.removeChild(modal);
+        });
+        
+        // Switch to login modal
+        modal.querySelector('.login-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.removeChild(modal);
+            showLoginModal();
+        });
+    }
+});
+</script>
+{% endblock %}

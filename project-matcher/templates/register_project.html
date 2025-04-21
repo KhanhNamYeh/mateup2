@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Project - Project Matcher{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Register Your Project</h1>
+    <form action="{{ url_for('register_project') }}" method="POST" class="project-form">
+        <div class="form-group">
+            <label for="kind">Project Type/Category</label>
+            <select id="kind" name="kind" required>
+                <option value="">Select a category</option>
+                <option value="Software">Software Development</option>
+                <option value="Hardware">Hardware/Electronics</option>
+                <option value="Art">Art & Design</option>
+                <option value="Research">Research</option>
+                <option value="Business">Business</option>
+                <option value="Education">Education</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="country">Country/Location</label>
+            <input type="text" id="country" name="country" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="name">Project Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="idea">Your Idea (describe your project)</label>
+            <textarea id="idea" name="idea" rows="5" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="partner">What you're looking for in a partner</label>
+            <textarea id="partner" name="partner" rows="5" required></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Register Project</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

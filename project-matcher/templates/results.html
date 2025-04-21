@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Matching Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Projects That Match Your Interests</h1>
+    
+    <div class="projects-container">
+        {% if projects %}
+            {% for project in projects %}
+                <div class="project-card" data-project-id="{{ project.id }}">
+                    <div class="project-header">
+                        <h2>{{ project.name }}</h2>
+                        <span class="project-category">{{ project.kind }}</span>
+                    </div>
+                    
+                    <div class="project-details">
+                        <p><strong>Country:</strong> {{ project.country }}</p>
+                        <p><strong>Idea:</strong> {{ project.idea }}</p>
+                        <p><strong>Looking for:</strong> {{ project.partner }}</p>
+                    </div>
+                    
+                    <div class="project-actions">
+                        <button class="btn btn-outline save-project">
+                            <i class="fas fa-bookmark"></i> Save
+                        </button>
+                        <button class="btn btn-primary connect-btn">
+                            <i class="fas fa-handshake"></i> Connect
+                        </button>
+                    </div>
+                    
+                    <div class="connection-form hidden">
+                        <form action="{{ url_for('send_connection') }}" method="POST">
+                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                            <div class="form-group">
+                                <label for="message-{{ project.id }}">Message to project owner:</label>
+                                <textarea id="message-{{ project.id }}" name="message" required></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline cancel-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Send Connection Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h2>No matching projects found</h2>
+                <p>Try adjusting your project details or check back later</p>
+                <a href="{{ url_for('register_project') }}" class="btn btn-primary">Back to Project Registration</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Login/Register Modals -->
+<div id="login-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Login to Continue</h2>
+        <p>You need to log in to save projects or connect with others</p>
+        <form id="login-form" action="{{ url_for('login_page') }}" method="POST">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </form>
+        <p class="text-center">Don't have an account? <a href="#" id="show-register">Register</a></p>
+    </div>
+</div>
+
+<div id="register-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Create an Account</h2>
+        <form id="register-form" action="{{ url_for('register_user') }}" method="POST">
+            <div class="form-group">
+                <label for="reg-name">Full Name</label>
+                <input type="text" id="reg-name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm_password" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+        </form>
+        <p class="text-center">Already have an account? <a href="#" id="show-login">Login</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Connect button functionality
+    const connectButtons = document.querySelectorAll('.connect-btn');
+    const saveButtons = document.querySelectorAll('.save-project');
+    const cancelButtons = document.querySelectorAll('.cancel-btn');
+    
+    // Show connection form
+    connectButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const projectCard = this.closest('.project-card');
+            const connectionForm = projectCard.querySelector('.connection-form');
+            connectionForm.classList.remove('hidden');
+            this.classList.add('hidden');
+        });
+    });
+    
+    // Hide connection form
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const projectCard = this.closest('.project-card');
+            const connectionForm = projectCard.querySelector('.connection-form');
+            const connectBtn = projectCard.querySelector('.connect-btn');
+            connectionForm.classList.add('hidden');
+            connectBtn.classList.remove('hidden');
+        });
+    });
+    
+    // Save project
+    saveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const projectCard = this.closest('.project-card');
+            const projectId = projectCard.dataset.projectId;
+            
+            fetch('/save-project', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ project_id: projectId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.innerHTML = '<i class="fas fa-check"></i> Saved';
+                    this.classList.add('saved');
+                    this.disabled = true;
+                } else {
+                    alert(data.message || 'Could not save project');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    });
+    
+    // Modal functionality
+    const loginModal = document.getElementById('login-modal');
+    const registerModal = document.getElementById('register-modal');
+    const closeButtons = document.querySelectorAll('.close');
+    const showRegisterLink = document.getElementById('show-register');
+    const showLoginLink = document.getElementById('show-login');
+    
+    // Close modals
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            loginModal.classList.add('hidden');
+            registerModal.classList.add('hidden');
+        });
+    });
+    
+    // Switch between modals
+    if (showRegisterLink) {
+        showRegisterLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginModal.classList.add('hidden');
+            registerModal.classList.remove('hidden');
+        });
+    }
+    
+    if (showLoginLink) {
+        showLoginLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            registerModal.classList.add('hidden');
+            loginModal.classList.remove('hidden');
+        });
+    }
+});
+</script>
+{% endblock %}

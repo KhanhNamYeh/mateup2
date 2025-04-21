@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}My Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>My Projects</h1>
+    
+    <div class="section">
+        <h2>Projects I Created</h2>
+        
+        <div class="projects-grid">
+            {% if projects %}
+                {% for project in projects %}
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>{{ project.name }}</h3>
+                            <span class="badge">{{ project.kind }}</span>
+                        </div>
+                        <div class="project-details">
+                            <p><strong>Country:</strong> {{ project.country }}</p>
+                            <p><strong>Idea:</strong> {{ project.idea }}</p>
+                            <p><strong>Looking for:</strong> {{ project.partner }}</p>
+                        </div>
+                        <div class="project-actions">
+                            <a href="#" class="btn btn-outline">Edit</a>
+                            <a href="#" class="btn btn-outline">Delete</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>No projects yet</h3>
+                    <p>You haven't created any projects yet.</p>
+                    <a href="{{ url_for('register_project') }}" class="btn btn-primary">Create a Project</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Saved Projects</h2>
+        
+        <div class="projects-grid">
+            {% if saved_projects %}
+                {% for project in saved_projects %}
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>{{ project.name }}</h3>
+                            <span class="badge">{{ project.kind }}</span>
+                        </div>
+                        <div class="project-details">
+                            <p><strong>Country:</strong> {{ project.country }}</p>
+                            <p><strong>Idea:</strong> {{ project.idea }}</p>
+                            <p><strong>Looking for:</strong> {{ project.partner }}</p>
+                        </div>
+                        <div class="project-actions">
+                            <form action="{{ url_for('send_connection') }}" method="POST">
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <div class="form-group">
+                                    <label for="message-{{ project.id }}">Message:</label>
+                                    <textarea id="message-{{ project.id }}" name="message" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Connect</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-bookmark"></i>
+                    <h3>No saved projects</h3>
+                    <p>You haven't saved any projects yet.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Explore Projects</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .section {
+        margin-bottom: 40px;
+    }
+    
+    .section h2 {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .project-card {
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .project-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .project-header h3 {
+        margin: 0;
+    }
+    
+    .badge {
+        background: #4a90e2;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .project-details {
+        margin-bottom: 15px;
+    }
+    
+    .project-details p {
+        margin: 5px 0;
+    }
+    
+    .project-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        grid-column: 1 / -1;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        color: #ccc;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state h3 {
+        margin: 10px 0;
+    }
+    
+    .empty-state p {
+        margin-bottom: 20px;
+        color: #777;
+    }
+</style>
+{% endblock %}

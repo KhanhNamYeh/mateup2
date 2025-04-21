@@ -1,0 +1,52 @@
+.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MateUp{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>MateUp</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{{ url_for('register_project') }}"><i class="fas fa-plus-circle"></i> Register Project</a></li>
+                    {% if session.user_id %}
+                        <li><a href="{{ url_for('my_projects') }}"><i class="fas fa-bookmark"></i> My Projects</a></li>
+                        <li><a href="{{ url_for('my_connections') }}"><i class="fas fa-handshake"></i> My Connections</a></li>
+                        <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        <li class="user-greeting">Hello, {{ session.user_name }}</li>
+                    {% else %}
+                        <li><a href="#" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                        <li><a href="#" class="register-btn"><i class="fas fa-user-plus"></i> Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages container">
+                {% for message in messages %}
+                    <div class="flash-message">
+                        <i class="fas fa-info-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
