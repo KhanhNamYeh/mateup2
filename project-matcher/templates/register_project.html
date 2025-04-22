@@ -1,48 +1,111 @@
 {% extends 'base.html' %}
 
-{% block title %}Register Project - Project Matcher{% endblock %}
+{% block title %}Register Project{% endblock %}
 
 {% block content %}
 <div class="container">
     <h1>Register Your Project</h1>
+    <p class="subtitle">Share your project idea and find potential collaborators</p>
+    
     <form action="{{ url_for('register_project') }}" method="POST" class="project-form">
-        <div class="form-group">
-            <label for="kind">Project Type/Category</label>
-            <select id="kind" name="kind" required>
-                <option value="">Select a category</option>
-                <option value="Software">Software Development</option>
-                <option value="Hardware">Hardware/Electronics</option>
-                <option value="Art">Art & Design</option>
-                <option value="Research">Research</option>
-                <option value="Business">Business</option>
-                <option value="Education">Education</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="country">Country/Location</label>
-            <input type="text" id="country" name="country" required>
-        </div>
-        
         <div class="form-group">
             <label for="name">Project Name</label>
             <input type="text" id="name" name="name" required>
         </div>
         
         <div class="form-group">
-            <label for="idea">Your Idea (describe your project)</label>
-            <textarea id="idea" name="idea" rows="5" required></textarea>
+            <label for="kind">Project Category</label>
+            <select id="kind" name="kind" required>
+                <option value="">Select a category</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="country">Country/Location</label>
+            <select id="country" name="country" required>
+                <option value="">Select a country</option>
+                {% for country in countries %}
+                    <option value="{{ country }}">{{ country }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="idea">Project Description</label>
+            <textarea id="idea" name="idea" rows="4" placeholder="Describe your project idea..." required></textarea>
         </div>
         
         <div class="form-group">
             <label for="partner">What you're looking for in a partner</label>
-            <textarea id="partner" name="partner" rows="5" required></textarea>
+            <textarea id="partner" name="partner" rows="4" placeholder="Describe the skills, experience, or resources you need..." required></textarea>
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Register Project</button>
+            <button type="submit" class="btn btn-primary">Find Matches</button>
         </div>
     </form>
 </div>
+
+<style>
+    .project-form {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+    }
+    
+    .form-actions {
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .btn-primary {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+        background-color: #3a7bc8;
+    }
+</style>
 {% endblock %}

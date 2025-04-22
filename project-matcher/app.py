@@ -233,5 +233,71 @@ def update_connection(connection_id):
     
     return redirect(url_for('my_connections'))
 
+@app.route('/notifications')
+@login_required
+def notifications():
+    user_id = session['user_id']
+    notifications = data_service.get_notifications_for_user(user_id)
+    
+    return render_template('notifications.html', notifications=notifications)
+
+@app.route('/api/notifications')
+@login_required
+def api_notifications():
+    user_id = session['user_id']
+    notifications = data_service.get_notifications_for_user(user_id)
+    
+    return jsonify({
+        "count": len(notifications),
+        "notifications": notifications[:5]  # Return top 5 notifications
+    })
+
+@app.route('/delete-connection/<int:connection_id>', methods=['POST'])
+@login_required
+def delete_connection(connection_id):
+    user_id = session['user_id']
+    success = data_service.delete_connection(connection_id, user_id)
+    
+    if success:
+        flash('Connection request deleted')
+    else:
+        flash('Failed to delete connection request')
+    
+    return redirect(url_for('my_connections'))
+
+@app.route('/view-project/<int:project_id>')
+def view_project(project_id):
+    project = data_service.get_project_by_id(project_id)
+    
+    if not project:
+        flash('Project not found')
+        return redirect(url_for('index'))
+    
+    owner = data_service.get_user_by_id(project['owner_id'])
+    
+    # Check if current user is logged in
+    can_connect = False
+    has_connection = False
+    connection_status = None
+    
+    if session.get('user_id'):
+        user_id = session['user_id']
+        # Can't connect to own project
+        can_connect = project['owner_id'] != user_id
+        
+        # Check for existing connection
+        connection = data_service.get_connection_by_project_and_user(project_id, user_id)
+        if connection:
+            has_connection = True
+            connection_status = connection['status']
+    
+    return render_template(
+        'view_project.html',
+        project=project,
+        owner=owner,
+        can_connect=can_connect,
+        has_connection=has_connection,
+        connection_status=connection_status
+    )
 if __name__ == '__main__':
     app.run(debug=True)

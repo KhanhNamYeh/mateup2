@@ -59,7 +59,23 @@
       "projects": [
         9,
         10,
-        11
+        11,
+        12,
+        14
+      ],
+      "saved_projects": [],
+      "connections": []
+    },
+    {
+      "id": 4,
+      "name": "abc",
+      "email": "abc12@gmail.com",
+      "password_hash": "scrypt:32768:8:1$WlMY4ufD6zpx4uY1$e8ec4fe9dc4350809e66f57fd091bf518f8c874631dc825c0138c7244e3d9c6b63d0fed9eab4109f09765d9b568f9413cc71f38d69073b9e49c1b033e00e028c",
+      "created_at": "2025-04-22T03:49:01.771222",
+      "projects": [
+        13,
+        15,
+        16
       ],
       "saved_projects": [],
       "connections": []
@@ -186,6 +202,61 @@
       "partner": "abc",
       "created_at": "2025-04-21T15:51:20.135433",
       "status": "active"
+    },
+    {
+      "id": 12,
+      "owner_id": 3,
+      "name": "AI Startup",
+      "kind": "Art",
+      "country": "USA",
+      "idea": "ab",
+      "partner": "b",
+      "created_at": "2025-04-22T03:43:27.289679",
+      "status": "active"
+    },
+    {
+      "id": 13,
+      "owner_id": 4,
+      "name": "AI Startup",
+      "kind": "Hardware",
+      "country": "USA",
+      "idea": "ab",
+      "partner": "ab",
+      "created_at": "2025-04-22T03:49:09.730728",
+      "status": "active"
+    },
+    {
+      "id": 14,
+      "owner_id": 3,
+      "name": "AI Startup",
+      "kind": "Tech",
+      "country": "USA",
+      "idea": "test test test",
+      "partner": "test test test",
+      "created_at": "2025-04-22T04:06:05.550575",
+      "status": "active"
+    },
+    {
+      "id": 15,
+      "owner_id": 4,
+      "name": "AI Startup",
+      "kind": "Tech",
+      "country": "USA",
+      "idea": "test test test",
+      "partner": "test test test",
+      "created_at": "2025-04-22T04:06:41.115498",
+      "status": "active"
+    },
+    {
+      "id": 16,
+      "owner_id": 4,
+      "name": "AI Startup",
+      "kind": "Tech",
+      "country": "USA",
+      "idea": "t",
+      "partner": "t",
+      "created_at": "2025-04-22T04:10:42.556960",
+      "status": "active"
     }
   ],
   "connections": [
@@ -227,7 +298,8 @@
         "projects": [
           9,
           10,
-          11
+          11,
+          12
         ],
         "saved_projects": [],
         "connections": []
@@ -277,7 +349,57 @@
       "message": "I have experience developing fintech applications. Let's discuss your project!",
       "status": "pending",
       "created_at": "2025-04-20T15:10:00Z",
-      "updated_at": "2025-04-20T15:10:00Z"
+      "updated_at": "2025-04-20T15:10:00Z",
+      "from_user": {
+        "id": 4,
+        "name": "abc",
+        "email": "abc12@gmail.com",
+        "password_hash": "scrypt:32768:8:1$WlMY4ufD6zpx4uY1$e8ec4fe9dc4350809e66f57fd091bf518f8c874631dc825c0138c7244e3d9c6b63d0fed9eab4109f09765d9b568f9413cc71f38d69073b9e49c1b033e00e028c",
+        "created_at": "2025-04-22T03:49:01.771222",
+        "projects": [
+          13,
+          15,
+          16
+        ],
+        "saved_projects": [],
+        "connections": []
+      },
+      "to_user": {
+        "id": 1,
+        "name": "John Smith",
+        "email": "john@example.com",
+        "password_hash": "pbkdf2:sha256:150000$abc123",
+        "created_at": "2025-04-15T10:30:00Z",
+        "projects": [
+          2,
+          5
+        ],
+        "saved_projects": [
+          3,
+          7
+        ],
+        "connections": [
+          {
+            "connection_id": 1,
+            "status": "accepted"
+          },
+          {
+            "connection_id": 4,
+            "status": "pending"
+          }
+        ]
+      },
+      "project": {
+        "id": 2,
+        "owner_id": 1,
+        "name": "Fintech App",
+        "kind": "Tech",
+        "country": "Canada",
+        "idea": "Personal finance management for students",
+        "partner": "Developers with financial background",
+        "created_at": "2025-04-15T11:30:00Z",
+        "status": "active"
+      }
     }
   ],
   "categories": [

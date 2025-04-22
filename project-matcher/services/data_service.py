@@ -342,3 +342,79 @@ class DataService:
         
         # Return top 5 matches
         return matching_projects[:5]
+
+def get_notifications_for_user(self, user_id):
+    """Get notifications for a user (connections, etc)"""
+    notifications = []
+    
+    # Get connection requests received by the user
+    connections = self.get_connections_by_user(user_id)
+    
+    for connection in connections:
+        # Check if the connection is to the user and is still pending
+        if connection["to_user_id"] == user_id and connection["status"] == "pending":
+            # Get project and sender info
+            sender = self.get_user_by_id(connection["from_user_id"])
+            project = self.get_project_by_id(connection["to_project_id"])
+            
+            if sender and project:
+                notifications.append({
+                    "id": connection["id"],
+                    "type": "connection_request",
+                    "sender_name": sender["name"],
+                    "sender_id": sender["id"],
+                    "project_name": project["name"],
+                    "project_id": project["id"],
+                    "message": connection["message"],
+                    "created_at": connection["created_at"],
+                    "read": False,  # Add read status tracking if needed
+                    "connection_id": connection["id"]
+                })
+    
+    # Sort notifications by date (newest first)
+    notifications.sort(key=lambda x: x["created_at"], reverse=True)
+    
+    return notifications
+
+def get_project_owner(self, project_id):
+    """Get the owner of a project"""
+    project = self.get_project_by_id(project_id)
+    if project:
+        return self.get_user_by_id(project["owner_id"])
+    return None
+
+def get_connection_by_project_and_user(self, project_id, user_id):
+    """Check if a connection request already exists"""
+    for conn in self.data.get("connections", []):
+        if conn["to_project_id"] == project_id and conn["from_user_id"] == user_id:
+            return conn
+    return None
+
+def delete_connection(self, connection_id, user_id):
+    """Delete a connection (only allowed if pending and initiated by user)"""
+    conn = self.get_connection_by_id(connection_id)
+    
+    if not conn or conn["from_user_id"] != user_id or conn["status"] != "pending":
+        return False
+    
+    # Remove from connections list
+    self.data["connections"] = [c for c in self.data["connections"] if c["id"] != connection_id]
+    
+    # Remove from users' connections lists
+    from_user = self.get_user_by_id(conn["from_user_id"])
+    to_user = self.get_user_by_id(conn["to_user_id"])
+    
+    if from_user and "connections" in from_user:
+        from_user["connections"] = [
+            c for c in from_user["connections"] 
+            if c.get("connection_id") != connection_id
+        ]
+    
+    if to_user and "connections" in to_user:
+        to_user["connections"] = [
+            c for c in to_user["connections"] 
+            if c.get("connection_id") != connection_id
+        ]
+    
+    self.save_data()
+    return True

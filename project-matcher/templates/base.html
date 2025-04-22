@@ -1,4 +1,4 @@
-.html
+<!--base.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +18,12 @@
                     <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
                     <li><a href="{{ url_for('register_project') }}"><i class="fas fa-plus-circle"></i> Register Project</a></li>
                     {% if session.user_id %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('notifications') }}" class="nav-link">
+                                <i class="fas fa-bell"></i> Notifications
+                                <span id="notification-badge" class="badge badge-danger" style="display: none;">0</span>
+                            </a>
+                        </li>
                         <li><a href="{{ url_for('my_projects') }}"><i class="fas fa-bookmark"></i> My Projects</a></li>
                         <li><a href="{{ url_for('my_connections') }}"><i class="fas fa-handshake"></i> My Connections</a></li>
                         <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -48,5 +54,32 @@
     </main>
     
     {% block extra_scripts %}{% endblock %}
+    <script>
+        // Check for notifications when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only fetch notifications if user is logged in
+            if ({{ 'true' if session.get('user_id') else 'false' }}) {
+                fetchNotifications();
+                
+                // Check for new notifications every 60 seconds
+                setInterval(fetchNotifications, 60000);
+            }
+        });
+        
+        function fetchNotifications() {
+            fetch('{{ url_for("api_notifications") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching notifications:', error));
+        }
+    </script>
 </body>
 </html>

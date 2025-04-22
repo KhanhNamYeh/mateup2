@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="project-view">
+        <div class="project-header">
+            <h1>{{ project.name }}</h1>
+            <div class="project-tags">
+                <span class="badge">{{ project.kind }}</span>
+                <span class="badge badge-location">{{ project.country }}</span>
+            </div>
+        </div>
+        
+        <div class="project-meta">
+            <div class="project-owner">
+                <img src="https://ui-avatars.com/api/?name={{ owner.name }}&background=random" alt="User avatar" class="avatar">
+                <div>
+                    <p><strong>Created by:</strong> {{ owner.name }}</p>
+                    <p><small>Posted on {{ project.created_at[:10] }}</small></p>
+                </div>
+            </div>
+            
+            <div class="project-actions">
+                {% if can_connect %}
+                    {% if has_connection %}
+                        <div class="connection-status {{ connection_status }}">
+                            <i class="{% if connection_status == 'pending' %}fas fa-clock{% elif connection_status == 'accepted' %}fas fa-check-circle{% else %}fas fa-times-circle{% endif %}"></i>
+                            Request {{ connection_status }}
+                        </div>
+                    {% else %}
+                        <button id="connect-btn" class="btn btn-primary">
+                            <i class="fas fa-plug"></i> Connect with Owner
+                        </button>
+                    {% endif %}
+                {% endif %}
+                
+                {% if session.get('user_id') %}
+                    <button class="btn btn-outline save-project" data-project-id="{{ project.id }}">
+                        <i class="far fa-bookmark"></i> Save Project
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="project-content">
+            <div class="content-section">
+                <h2>Project Idea</h2>
+                <p>{{ project.idea }}</p>
+            </div>
+            
+            <div class="content-section">
+                <h2>Looking for</h2>
+                <p>{{ project.partner }}</p>
+            </div>
+        </div>
+        
+        <!-- Connection form (hidden by default) -->
+        <div id="connection-form" class="connection-form hidden">
+            <form action="{{ url_for('send_connection') }}" method="POST">
+                <input type="hidden" name="project_id" value="{{ project.id }}">
+                <div class="form-group">
+                    <label for="message">Message to project owner:</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Introduce yourself and explain why you'd like to connect..." required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .project-view {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+    
+    .project-header {
+        margin-bottom: 20px;
+    }
+    
+    .project-tags {
+        margin-top: 10px;
+    }
+    
+    .badge {
+        background: #4a90e2;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-right: 10px;
+    }
+    
+    .badge-location {
+        background: #5cb85c;
+    }
+    
+    .project-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 20px;
+    }
+    
+    .project-owner {
+        display: flex;
+        align-items: center;
+    }
+    
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+    
+    .project-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .connection-status {
+        padding: 8px 15px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .connection-status.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .connection-status.accepted {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .connection-status.rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .project-content {
+        margin-bottom: 30px;
+    }
+    
+    .content-section {
+        margin-bottom: 20px;
+    }
+    
+    .content-section h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    
+    .connection-form {
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        margin-top: 20px;
+    }
+    
+    .hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const connectBtn = document.getElementById('connect-btn');
+        const connectionForm = document.getElementById('connection-form');
+        const cancelBtn = document.getElementById('cancel-btn');
+        
+        if (connectBtn) {
+            connectBtn.addEventListener('click', function() {
+                connectionForm.classList.remove('hidden');
+                connectBtn.classList.add('hidden');
+            });
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                connectionForm.classList.add('hidden');
+                connectBtn.classList.remove('hidden');
+            });
+        }
+        
+        // Save project functionality
+        const saveBtn = document.querySelector('.save-project');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function() {
+                const projectId = this.getAttribute('data-project-id');
+                saveProject(projectId, this);
+            });
+        }
+        
+        function saveProject(projectId, button) {
+            fetch('{{ url_for("save_project") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ project_id: projectId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    button.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                    button.classList.add('saved');
+                    button.disabled = true;
+                } else {
+                    alert(data.message || 'Failed to save project');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the project');
+            });
+        }
+    });
+</script>
+{% endblock %}

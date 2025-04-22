@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Notifications</h1>
+    
+    <div class="notifications-container">
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="notification-card">
+                    {% if notification.type == 'connection_request' %}
+                        <div class="notification-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h3>Connection Request</h3>
+                            <p><strong>{{ notification.sender_name }}</strong> wants to connect about your project <strong>{{ notification.project_name }}</strong></p>
+                            <p class="notification-message">"{{ notification.message }}"</p>
+                            <div class="notification-actions">
+                                <form action="{{ url_for('update_connection', connection_id=notification.connection_id) }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="btn btn-success">Accept</button>
+                                </form>
+                                <form action="{{ url_for('update_connection', connection_id=notification.connection_id) }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                </form>
+                            </div>
+                            <span class="notification-time">{{ notification.created_at }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <h2>No notifications</h2>
+                <p>You're all caught up!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .notifications-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .notification-card {
+        display: flex;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: transform 0.2s;
+    }
+    
+    .notification-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .notification-icon {
+        font-size: 24px;
+        color: #4a90e2;
+        margin-right: 20px;
+        padding-top: 5px;
+    }
+    
+    .notification-content {
+        flex: 1;
+    }
+    
+    .notification-content h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    
+    .notification-message {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        font-style: italic;
+        margin: 10px 0;
+    }
+    
+    .notification-actions {
+        margin-top: 15px;
+    }
+    
+    .notification-time {
+        display: block;
+        font-size: 12px;
+        color: #777;
+        margin-top: 10px;
+    }
+    
+    .empty-notifications {
+        text-align: center;
+        padding: 50px 0;
+    }
+    
+    .empty-notifications i {
+        font-size: 48px;
+        color: #ccc;
+        margin-bottom: 20px;
+    }
+    
+    .btn-success {
+        background-color: #5cb85c;
+        color: white;
+    }
+    
+    .btn-danger {
+        background-color: #d9534f;
+        color: white;
+    }
+    
+    .inline-form {
+        display: inline-block;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

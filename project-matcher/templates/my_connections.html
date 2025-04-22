@@ -1,65 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Connections</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    {% include 'base.html' %}
-    
-    <div class="container">
-        <div class="results-header">
-            <h1>My Connection Requests</h1>
-            <p>Manage your outgoing connection requests with project owners</p>
-        </div>
+{% extends 'base.html' %}
+
+{% block title %}My Connections{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h2>My Connection Requests</h2>
         
         {% if connections %}
-            <ul class="connections-list">
+            <div class="connections-list">
                 {% for connection in connections %}
-                    <li class="connection-item">
+                    <div class="connection-item">
                         <div class="connection-header">
-                            <h3>Request to Project #{{ connection.project_id }}</h3>
-                            <span class="connection-status {{ connection.status }}">{{ connection.status }}</span>
+                            <h3>
+                                {% if connection.from_user_id == session.user_id %}
+                                    Your request to: {{ connection.to_user.name }}'s project "{{ connection.project.name }}"
+                                {% else %}
+                                    Request from: {{ connection.from_user.name }} for your project "{{ connection.project.name }}"
+                                {% endif %}
+                            </h3>
+                            <span class="badge badge-{{ connection.status }}">{{ connection.status }}</span>
                         </div>
-                        <div class="connection-content">
-                            <div class="connection-message">
-                                <h4>Your Message:</h4>
-                                <p>{{ connection.message or "No message provided" }}</p>
-                            </div>
-                            <div class="connection-actions">
-                                <button class="action-button primary-button">View Project</button>
-                                <button class="action-button secondary-button">Cancel Request</button>
-                            </div>
+                        <div class="connection-details">
+                            <p><strong>Message:</strong> {{ connection.message }}</p>
+                            <p><strong>Sent:</strong> {{ connection.created_at[:10] }}</p>
+                            {% if connection.status != 'pending' %}
+                                <p><strong>Response date:</strong> {{ connection.updated_at[:10] }}</p>
+                            {% endif %}
                         </div>
-                    </li>
+                        <div class="connection-actions">
+                            {% if connection.from_user_id == session.user_id and connection.status == 'pending' %}
+                                <button class="btn btn-outline">Cancel Request</button>
+                            {% endif %}
+                            
+                            {% if connection.to_user_id == session.user_id and connection.status == 'pending' %}
+                                <form action="{{ url_for('update_connection', connection_id=connection.id) }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="btn btn-primary">Accept</button>
+                                </form>
+                                <form action="{{ url_for('update_connection', connection_id=connection.id) }}" method="POST" class="inline-form">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                </form>
+                            {% endif %}
+                            
+                            <a href="#" class="btn btn-outline">View Project</a>
+                        </div>
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
         {% else %}
             <div class="empty-state">
                 <i class="fas fa-handshake"></i>
                 <h3>No Connection Requests</h3>
-                <p>You haven't sent any connection requests yet. Find projects and connect with their owners!</p>
-                <a href="{{ url_for('register_project') }}" class="action-button primary-button">Find Projects</a>
+                <p>You haven't sent or received any connection requests yet.</p>
+                <a href="{{ url_for('register_project') }}" class="btn btn-primary">Find Projects</a>
             </div>
         {% endif %}
-        
-        <div class="action-buttons">
-            <a href="{{ url_for('my_projects') }}" class="action-button secondary-button">View Saved Projects</a>
-            <a href="{{ url_for('register_project') }}" class="action-button primary-button">Find More Projects</a>
-        </div>
     </div>
+</div>
+
+<style>
+    .connections-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
     
-    <footer>
-        <p>&copy; 2023 Project Matcher. All rights reserved.</p>
-    </footer>
+    .connection-item {
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Any JavaScript specific to this page would go here
-        });
-    </script>
-</body>
-</html>
+    .connection-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    
+    .connection-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+    
+    .connection-details {
+        margin-bottom: 15px;
+    }
+    
+    .connection-details p {
+        margin: 5px 0;
+    }
+    
+    .connection-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: white;
+    }
+    
+    .badge-pending {
+        background-color: #f39c12;
+    }
+    
+    .badge-accepted {
+        background-color: #2ecc71;
+    }
+    
+    .badge-rejected {
+        background-color: #e74c3c;
+    }
+    
+    .inline-form {
+        display: inline-block;
+    }
+    
+    .btn-danger {
+        background-color: #e74c3c;
+        color: white;
+    }
+</style>
+{% endblock %}
