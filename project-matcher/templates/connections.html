@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block title %}Connections | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="connections-container">
+    <h2>Your Connections</h2>
+    
+    <div class="connections-tabs">
+        <button class="tab-btn active" data-tab="active">Active Connections</button>
+        <button class="tab-btn" data-tab="pending">Pending Requests</button>
+    </div>
+    
+    <div class="tab-content active" id="active-connections">
+        {% if connections %}
+            <div class="connections-list">
+                {% for connection in connections %}
+                    {% set connection_user = connection_users.get(connection.id) %}
+                    <div class="connection-card">
+                        <div class="connection-info">
+                            <h3>{{ connection_user.username }}</h3>
+                            <p class="connection-since">Connected since: {{ connection.accepted_at.strftime('%B %d, %Y') }}</p>
+                            
+                            <div class="skills-section">
+                                <h4>Skills</h4>
+                                {% if connection_user.skills %}
+                                    <div class="skill-tags">
+                                        {% for skill in connection_user.skills %}
+                                            <span class="skill-tag">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="empty-info">No skills listed</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="connection-projects">
+                            <h4>Collaborating Projects</h4>
+                            {% if shared_projects.get(connection.id) %}
+                                <ul class="project-list">
+                                    {% for project in shared_projects.get(connection.id) %}
+                                        <li>
+                                            <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a>
+                                            {% if project.owner_id == connection_user.id %}
+                                                <span class="owner-badge">Owner</span>
+                                            {% elif project.owner_id == current_user.id %}
+                                                <span class="your-project-badge">Your Project</span>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="empty-info">No shared projects yet</p>
+                                <a href="{{ url_for('projects') }}" class="btn-small">Invite to a project</a>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="connection-actions">
+                            <a href="{{ url_for('connection_detail', connection_id=connection.id) }}" class="btn">View Details</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>You don't have any active connections yet.</p>
+                <a href="{{ url_for('users') }}" class="btn">Find Users</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="tab-content" id="pending-connections">
+        {% if pending_connections %}
+            <div class="connections-list pending">
+                {% for connection in pending_connections %}
+                    {% set connection_user = pending_users.get(connection.id) %}
+                    <div class="connection-card pending">
+                        <div class="connection-info">
+                            <h3>{{ connection_user.username }}</h3>
+                            <p class="connection-request-date">Request date: {{ connection.created_at.strftime('%B %d, %Y') }}</p>
+                            
+                            <div class="skills-section">
+                                <h4>Skills</h4>
+                                {% if connection_user.skills %}
+                                    <div class="skill-tags">
+                                        {% for skill in connection_user.skills %}
+                                            <span class="skill-tag">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="empty-info">No skills listed</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if connection.user_id_2 == current_user.id %}
+                            <div class="pending-actions">
+                                <form action="{{ url_for('accept_connection', connection_id=connection.id) }}" method="post">
+                                    <button type="submit" class="btn-small btn-accept">Accept</button>
+                                </form>
+                                <form action="{{ url_for('decline_connection', connection_id=connection.id) }}" method="post">
+                                    <button type="submit" class="btn-small btn-decline">Decline</button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="pending-status">
+                                <span class="awaiting">Awaiting response</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>You don't have any pending connection requests.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to current button and content
+                this.classList.add('active');
+                document.getElementById(tabName + '-connections').classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .connections-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .connections-tabs {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+    
+    .tab-btn {
+        padding: 8px 16px;
+        background: none;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #555;
+    }
+    
+    .tab-btn:hover {
+        background-color: #f0f0f0;
+    }
+    
+    .tab-btn.active {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .connections-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .connection-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 20px;
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .connection-card.pending {
+        grid-template-columns: 2fr 1fr;
+        background-color: #f8f9fa;
+        border-left: 4px solid #f39c12;
+    }
+    
+    .connection-info h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    
+    .connection-since, .connection-request-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    
+    .skills-section h4, .connection-projects h4 {
+        margin-bottom: 10px;
+        font-size: 1rem;
+        color: #555;
+    }
+    
+    .skill-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .skill-tag {
+        background-color: #e9f2fe;
+        border-radius: 16px;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        color: #3498db;
+    }
+    
+    .project-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .project-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .project-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .project-list a {
+        color: #333;
+        text-decoration: none;
+    }
+    
+    .project-list a:hover {
+        color: #3498db;
+    }
+    
+    .owner-badge, .your-project-badge {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    
+    .owner-badge {
+        background-color: #e1f5fe;
+        color: #0288d1;
+    }
+    
+    .your-project-badge {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+    
+    .connection-actions {
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .pending-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .pending-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    
+    .awaiting {
+        color: #f39c12;
+        font-style: italic;
+    }
+    
+    .empty-info {
+        color: #777;
+        font-style: italic;
+        margin: 5px 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 15px;
+        color: #666;
+    }
+    
+    @media (max-width: 768px) {
+        .connection-card {
+            grid-template-columns: 1fr;
+        }
+        
+        .connection-card.pending {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

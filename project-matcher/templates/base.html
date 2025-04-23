@@ -4,82 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MateUp{% endblock %}</title>
+    <title>{% block title %}Project Matcher{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>MateUp</h1>
-            <nav>
-                <ul>
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="{{ url_for('register_project') }}"><i class="fas fa-plus-circle"></i> Register Project</a></li>
-                    {% if session.user_id %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('notifications') }}" class="nav-link">
-                                <i class="fas fa-bell"></i> Notifications
-                                <span id="notification-badge" class="badge badge-danger" style="display: none;">0</span>
-                            </a>
-                        </li>
-                        <li><a href="{{ url_for('my_projects') }}"><i class="fas fa-bookmark"></i> My Projects</a></li>
-                        <li><a href="{{ url_for('my_connections') }}"><i class="fas fa-handshake"></i> My Connections</a></li>
-                        <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                        <li class="user-greeting">Hello, {{ session.user_name }}</li>
-                    {% else %}
-                        <li><a href="#" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-                        <li><a href="#" class="register-btn"><i class="fas fa-user-plus"></i> Register</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+        <nav>
+            <div class="logo">
+                <h1>Project Matcher</h1>
+            </div>
+            <ul class="nav-links">
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('projects') }}"><i class="fas fa-project-diagram"></i> Projects</a></li>
+                <li><a href="{{ url_for('users') }}"><i class="fas fa-users"></i> Find Users</a></li>
+                <li><a href="{{ url_for('connections') }}"><i class="fas fa-user-friends"></i> Connections</a></li>
+                <li class="notification-icon">
+                    <a href="{{ url_for('notifications') }}">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notification-count">0</span>
+                    </a>
+                </li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
     </header>
     
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flash-messages container">
-                {% for message in messages %}
-                    <div class="flash-message">
-                        <i class="fas fa-info-circle"></i> {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-    
     <main>
-        {% block content %}{% endblock %}
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flashes">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
     </main>
     
-    {% block extra_scripts %}{% endblock %}
-    <script>
-        // Check for notifications when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Only fetch notifications if user is logged in
-            if ({{ 'true' if session.get('user_id') else 'false' }}) {
-                fetchNotifications();
-                
-                // Check for new notifications every 60 seconds
-                setInterval(fetchNotifications, 60000);
-            }
-        });
-        
-        function fetchNotifications() {
-            fetch('{{ url_for("api_notifications") }}')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.getElementById('notification-badge');
-                    if (data.count > 0) {
-                        badge.textContent = data.count;
-                        badge.style.display = 'inline-block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Error fetching notifications:', error));
-        }
-    </script>
+    <footer>
+        <p>&copy; {{ now.year }} Project Matcher. All rights reserved.</p>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/image-error-handler.js') }}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

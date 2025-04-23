@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ todolist.title }} | To-Do List | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="todolist-container">
+    <div class="todolist-header">
+        <h2>{{ todolist.title }}</h2>
+        <p class="todolist-meta">
+            Created on {{ todolist.created_at.strftime('%B %d, %Y') }} by {{ owner.username }}
+            {% if collaborators %}
+                <span class="collaborating-with">
+                    Collaborating with 
+                    {% for collaborator in collaborators %}
+                        {{ collaborator.username }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-container">
+        <div class="progress-label">
+            <span>Progress:</span>
+            <span class="progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Completion overlay -->
+    <div class="completion-overlay" style="display: none;">
+        <div class="completion-message">
+            <h2>🎉 All Tasks Completed! 🎉</h2>
+            <p>Congratulations! You've completed all tasks in this to-do list.</p>
+            <button class="btn btn-primary close-overlay-btn">Continue</button>
+        </div>
+    </div>
+
+    <div class="todolist-content">
+        <div class="task-board">
+            <div class="task-column">
+                <h3>To Do</h3>
+                <div class="tasks-list pending-tasks">
+                    {% set pending_tasks = tasks|selectattr('status', 'equalto', 'pending')|list %}
+                    {% for task in pending_tasks %}
+                        <div class="task-card" data-task-id="{{ task.id }}">
+                            <label class="task-checkbox-label">
+                                <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}">
+                                <div class="task-content">
+                                    <h4>{{ task.title }}</h4>
+                                    {% if task.description %}
+                                        <p class="task-description">{{ task.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </label>
+                            
+                            {% if task.assignee_id == current_user.id %}
+                                <div class="task-actions">
+                                    <form action="{{ url_for('update_task_status', task_id=task.id) }}" method="post">
+                                        <input type="hidden" name="status" value="accepted">
+                                        <button type="submit" class="btn-small btn-accept">Start</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">No pending tasks</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="task-column">
+                <h3>In Progress</h3>
+                <div class="tasks-list progress-tasks">
+                    {% set progress_tasks = tasks|selectattr('status', 'in', ['accepted', 'in_progress'])|list %}
+                    {% for task in progress_tasks %}
+                        <div class="task-card" data-task-id="{{ task.id }}">
+                            <label class="task-checkbox-label">
+                                <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}">
+                                <div class="task-content">
+                                    <h4>{{ task.title }}</h4>
+                                    {% if task.description %}
+                                        <p class="task-description">{{ task.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </label>
+                            
+                            {% if task.assignee_id == current_user.id %}
+                                <div class="task-actions">
+                                    <form action="{{ url_for('update_task_status', task_id=task.id) }}" method="post">
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="btn-small btn-complete">Complete</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">No tasks in progress</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="task-column">
+                <h3>Completed</h3>
+                <div class="tasks-list completed-tasks">
+                    {% set completed_tasks = tasks|selectattr('status', 'equalto', 'completed')|list %}
+                    {% for task in completed_tasks %}
+                        <div class="task-card completed-task" data-task-id="{{ task.id }}">
+                            <label class="task-checkbox-label">
+                                <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}" checked>
+                                <div class="task-content">
+                                    <h4>{{ task.title }}</h4>
+                                    {% if task.description %}
+                                        <p class="task-description">{{ task.description }}</p>
+                                    {% endif %}
+                                    <span class="completed-by">
+                                        Completed by {{ owner.username if task.assignee_id == owner.id else collaborators[0].username }}
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                    {% else %}
+                        <p class="empty-state">No completed tasks</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="todolist-actions">
+            <button class="btn btn-secondary add-task-btn">Add Task</button>
+            <a href="{{ url_for('todo_list') }}" class="btn btn-outline">Back to To-Do Lists</a>
+        </div>
+        
+        <div class="add-task-form hidden">
+            <h3>Add New Task</h3>
+            <form action="{{ url_for('add_task_to_todolist', todolist_id=todolist.id) }}" method="post">
+                <div class="form-group">
+                    <label for="task_title">Task Title</label>
+                    <input type="text" id="task_title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task_description">Description (Optional)</label>
+                    <textarea id="task_description" name="description" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignee_id">Assign To</label>
+                    <select id="assignee_id" name="assignee_id" required>
+                        <option value="{{ current_user.id }}">Myself</option>
+                        {% for collaborator in collaborators %}
+                            <option value="{{ collaborator.id }}">{{ collaborator.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">Add Task</button>
+                    <button type="button" class="btn-cancel cancel-add-task">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addTaskBtn = document.querySelector('.add-task-btn');
+        const addTaskForm = document.querySelector('.add-task-form');
+        const cancelAddTaskBtn = document.querySelector('.cancel-add-task');
+        
+        if (addTaskBtn && addTaskForm && cancelAddTaskBtn) {
+            addTaskBtn.addEventListener('click', function() {
+                addTaskForm.classList.remove('hidden');
+                addTaskBtn.classList.add('hidden');
+            });
+            
+            cancelAddTaskBtn.addEventListener('click', function() {
+                addTaskForm.classList.add('hidden');
+                addTaskBtn.classList.remove('hidden');
+            });
+        }
+
+        // Task completion functionality
+        const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+        const progressFill = document.querySelector('.progress-fill');
+        const progressPercentage = document.querySelector('.progress-percentage');
+        const completionOverlay = document.querySelector('.completion-overlay');
+        const closeOverlayBtn = document.querySelector('.close-overlay-btn');
+        
+        function updateProgress() {
+            const totalTasks = taskCheckboxes.length;
+            if (totalTasks === 0) return;
+            
+            const completedTasks = document.querySelectorAll('.task-checkbox:checked').length;
+            const percentage = Math.round((completedTasks / totalTasks) * 100);
+            
+            progressFill.style.width = `${percentage}%`;
+            progressPercentage.textContent = `${percentage}%`;
+            
+            // Show completion overlay when 100% complete
+            if (percentage === 100) {
+                completionOverlay.style.display = 'flex';
+                document.body.classList.add('overlay-active');
+            }
+        }
+        
+        // Initialize progress bar
+        updateProgress();
+        
+        // Add event listeners to checkboxes
+        taskCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const taskId = this.dataset.taskId;
+                const isCompleted = this.checked;
+                const taskCard = this.closest('.task-card');
+                
+                // Visual update
+                if (isCompleted) {
+                    taskCard.classList.add('completed-task');
+                } else {
+                    taskCard.classList.remove('completed-task');
+                }
+                
+                // Send request to update task status
+                fetch(`/tasks/${taskId}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        status: isCompleted ? 'completed' : 'in_progress'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateProgress();
+                    } else {
+                        console.error('Failed to update task:', data.message);
+                        // Revert the checkbox if update fails
+                        this.checked = !isCompleted;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating task status:', error);
+                    this.checked = !isCompleted;
+                });
+            });
+        });
+        
+        // Close overlay button
+        if (closeOverlayBtn) {
+            closeOverlayBtn.addEventListener('click', function() {
+                completionOverlay.style.display = 'none';
+                document.body.classList.remove('overlay-active');
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .todolist-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .todolist-header {
+        margin-bottom: 2rem;
+    }
+    
+    .todolist-meta {
+        color: #666;
+    }
+    
+    .collaborating-with {
+        margin-left: 1rem;
+        padding-left: 1rem;
+        border-left: 2px solid #ddd;
+    }
+    
+    .task-board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .task-column {
+        background-color: #f5f7fa;
+        padding: 1rem;
+        border-radius: 5px;
+        min-height: 300px;
+    }
+    
+    .task-column h3 {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #ddd;
+        text-align: center;
+    }
+    
+    .tasks-list {
+        min-height: 200px;
+    }
+    
+    .task-card {
+        background: white;
+        border-radius: 5px;
+        padding: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 0.75rem;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .task-card h4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .task-description {
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+    
+    .task-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+    
+    .completed-by {
+        font-size: 0.8rem;
+        color: #666;
+        display: block;
+        margin-top: 0.5rem;
+    }
+    
+    .todolist-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #3498db;
+        color: #3498db;
+    }
+    
+    .btn-outline:hover {
+        background-color: #eaf2fa;
+    }
+    
+    .add-task-form {
+        background-color: #f5f7fa;
+        padding: 1.5rem;
+        border-radius: 5px;
+        margin-top: 2rem;
+    }
+    
+    .add-task-form h3 {
+        margin-bottom: 1rem;
+    }
+    
+    .hidden {
+        display: none;
+    }
+    
+    .btn-cancel {
+        background-color: transparent;
+        border: 1px solid #ddd;
+        color: #666;
+        margin-left: 0.5rem;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Progress bar styles */
+    .progress-container {
+        margin: 2rem 0;
+    }
+    
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .progress-bar {
+        height: 12px;
+        background-color: #e0e0e0;
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background-color: #4caf50;
+        border-radius: 6px;
+        transition: width 0.5s ease-in-out;
+    }
+    
+    /* Task checkbox styles */
+    .task-checkbox {
+        margin-right: 12px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .task-checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .completed-task {
+        background-color: #f1f8e9;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .completed-task h4 {
+        text-decoration: line-through;
+        color: #757575;
+    }
+    
+    /* Completion overlay */
+    .completion-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        animation: fadeIn 0.5s forwards;
+    }
+    
+    .completion-message {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 500px;
+        animation: scaleIn 0.3s forwards;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .completion-message h2 {
+        margin-bottom: 1rem;
+        color: #4caf50;
+    }
+    
+    .completion-message p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .overlay-active {
+        overflow: hidden;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes scaleIn {
+        from { transform: scale(0.8); }
+        to { transform: scale(1); }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Welcome, {{ current_user.username }}!</h2>
+    
+    <div class="dashboard-summary">
+        <div class="dashboard-card">
+            <h3>Notifications</h3>
+            {% if notifications %}
+                <ul class="notification-list">
+                    {% for notification in notifications %}
+                        <li>
+                            <span class="notification-content">{{ notification.content }}</span>
+                            <span class="notification-date">{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            <a href="{{ url_for('notifications') }}" class="btn-small">View All</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No new notifications</p>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card">
+            <h3>Your Projects</h3>
+            {% if projects %}
+                <ul class="project-list">
+                    {% for project in projects %}
+                        <li>
+                            <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('projects') }}" class="btn-small">View All</a>
+            {% else %}
+                <p>You don't have any projects yet</p>
+                <a href="{{ url_for('create_project') }}" class="btn-small">Create Project</a>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card">
+            <h3>Your Tasks</h3>
+            {% if tasks %}
+                <ul class="task-list">
+                    {% for task in tasks %}
+                        <li class="task-item task-status-{{ task.status }}">
+                            <span class="task-title">{{ task.title }}</span>
+                            <span class="task-status">{{ task.status }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('todo_list') }}" class="btn-small">View To-Do List</a>
+            {% else %}
+                <p>You don't have any tasks</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

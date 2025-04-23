@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Tasks | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="tasks-container">
+    <h2>Your Tasks</h2>
+    
+    <div class="task-lists">
+        <div class="task-section">
+            <h3>Tasks Assigned to You</h3>
+            {% if assigned_tasks %}
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Project</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in assigned_tasks %}
+                            <tr class="task-row status-{{ task.status }}">
+                                <td>{{ task.title }}</td>
+                                {% set project = projects_dict.get(task.project_id) %}
+                                <td>
+                                    {% if project %}
+                                        <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a>
+                                    {% else %}
+                                        Unknown Project
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ task.status }}">{{ task.status }}</span>
+                                </td>
+                                <td>{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'No deadline' }}</td>
+                                <td>
+                                    <div class="task-actions">
+                                        {% if task.status == 'pending' %}
+                                            <form method="post" action="{{ url_for('update_task_status', task_id=task.id) }}">
+                                                <input type="hidden" name="status" value="accepted">
+                                                <button type="submit" class="btn-small btn-accept">Accept</button>
+                                            </form>
+                                            <form method="post" action="{{ url_for('update_task_status', task_id=task.id) }}">
+                                                <input type="hidden" name="status" value="rejected">
+                                                <button type="submit" class="btn-small btn-decline">Reject</button>
+                                            </form>
+                                        {% elif task.status == 'accepted' %}
+                                            <form method="post" action="{{ url_for('update_task_status', task_id=task.id) }}">
+                                                <input type="hidden" name="status" value="in_progress">
+                                                <button type="submit" class="btn-small">Start</button>
+                                            </form>
+                                        {% elif task.status == 'in_progress' %}
+                                            <form method="post" action="{{ url_for('update_task_status', task_id=task.id) }}">
+                                                <input type="hidden" name="status" value="completed">
+                                                <button type="submit" class="btn-small btn-complete">Complete</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-state">No tasks have been assigned to you.</p>
+            {% endif %}
+        </div>
+        
+        <div class="task-section">
+            <h3>Tasks Created by You</h3>
+            {% if created_tasks %}
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Project</th>
+                            <th>Assigned To</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in created_tasks %}
+                            <tr class="task-row status-{{ task.status }}">
+                                <td>{{ task.title }}</td>
+                                {% set project = projects_dict.get(task.project_id) %}
+                                <td>
+                                    {% if project %}
+                                        <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a>
+                                    {% else %}
+                                        Unknown Project
+                                    {% endif %}
+                                </td>
+                                <td>{{ users_dict.get(task.assignee_id, {}).get('username', 'Unknown') }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ task.status }}">{{ task.status }}</span>
+                                </td>
+                                <td>{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'No deadline' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-state">You haven't created any tasks.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

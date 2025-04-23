@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/courses.css') }}">
+{% endblock %}
+
+{% block title %}Recommended Courses | {{ project.title }} | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="project-courses-container">
+    <div class="project-courses-header">
+        <div class="header-content">
+            <h2>{{ project.title }} - Recommended Courses</h2>
+            <div class="breadcrumbs">
+                <a href="{{ url_for('projects') }}">Projects</a> &gt; 
+                <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a> &gt; 
+                <span>Courses</span>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <form action="{{ url_for('search_courses') }}" method="get" class="search-form">
+                <input type="text" name="q" placeholder="Search all courses...">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <div class="category-filter">
+        <span class="filter-label">Browse by Category:</span>
+        <div class="category-pills">
+            {% for category in all_categories %}
+                <a href="{{ url_for('search_courses', category=category) }}" class="category-pill">{{ category }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="recommended-courses-section">
+        <h3>Courses Recommended for This Project</h3>
+        
+        {% if recommended_courses %}
+            <div class="courses-grid">
+                {% for course_data in recommended_courses %}
+                    {% set course = course_data[0] %}
+                    {% set relevance = course_data[1] %}
+                    <div class="course-card">
+                        <div class="course-relevance">{{ relevance|round|int }}% match</div>
+                        <div class="course-thumbnail">
+                            <img src="{{ url_for('static', filename='images/courses/' + course.thumbnail_url) }}" 
+                                 alt="{{ course.title }}" 
+                                 width="300" 
+                                 height="300" 
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text={{ course.title|urlencode }}'; this.alt='{{ course.title }}';">
+                            <div class="course-duration"><i class="far fa-clock"></i> {{ course.duration }} hours</div>
+                        </div>
+                        <div class="course-info">
+                            <h4 class="course-title">
+                                <a href="{{ url_for('course_detail', course_id=course.id, project_id=project.id) }}">{{ course.title }}</a>
+                            </h4>
+                            <div class="course-meta">
+                                <span class="course-category">{{ course.category }}</span>
+                                <div class="course-rating">
+                                    <span class="stars">
+                                        {% for i in range(5) %}
+                                            {% if i < course.rating|int %}
+                                                <i class="fas fa-star"></i>
+                                            {% elif i < course.rating|round(0, 'ceil') %}
+                                                <i class="fas fa-star-half-alt"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="rating-value">{{ course.rating }}</span>
+                                    <span class="student-count">({{ course.student_count }})</span>
+                                </div>
+                            </div>
+                            <p class="course-description">{{ course.description|truncate(100) }}</p>
+                            <div class="course-footer">
+                                <span class="course-price">${{ course.price }}</span>
+                                <a href="{{ url_for('course_detail', course_id=course.id, project_id=project.id) }}" class="btn-small">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No courses match this project's requirements.</p>
+                <a href="{{ url_for('search_courses') }}" class="btn">Browse All Courses</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .project-courses-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .project-courses-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+    
+    .breadcrumbs {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .breadcrumbs a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+    
+    .search-form {
+        display: flex;
+    }
+    
+    .search-form input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        width: 250px;
+    }
+    
+    .search-btn {
+        padding: 8px 12px;
+        background: #3498db;
+        color: white;
+        border: 1px solid #3498db;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+    }
+    
+    .category-filter {
+        margin-bottom: 2rem;
+    }
+    
+    .filter-label {
+        font-weight: 500;
+        margin-right: 1rem;
+    }
+    
+    .category-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 0.5rem;
+    }
+    
+    .category-pill {
+        padding: 6px 12px;
+        background-color: #f0f0f0;
+        border-radius: 20px;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .category-pill:hover {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .recommended-courses-section h3 {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+    
+    .course-card {
+        position: relative;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .course-relevance {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 1;
+    }
+    
+    .course-thumbnail {
+        position: relative;
+        height: 180px;  /* Increased height */
+        overflow: hidden;
+        background-color: #f5f5f5;  /* Background color for missing images */
+    }
+    
+    .course-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;  /* Maintain aspect ratio but ensure full coverage */
+        object-position: center;  /* Center the image */
+    }
+    
+    .course-info {
+        padding: 15px;
+    }
+    
+    .course-title {
+        margin-bottom: 8px;
+    }
+    
+    .course-title a {
+        color: #333;
+        text-decoration: none;
+    }
+    
+    .course-title a:hover {
+        color: #3498db;
+    }
+    
+    .course-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .course-category {
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .course-rating {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .stars {
+        color: #f39c12;
+        margin-right: 5px;
+    }
+    
+    .rating-value {
+        font-weight: 500;
+    }
+    
+    .student-count {
+        color: #666;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+    
+    .course-description {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+    
+    .course-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+    
+    .course-price {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #2ecc71;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f5f7fa;
+        border-radius: 8px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}To-Do Lists | {{ project.title }} | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="project-todolists-container">
+    <div class="project-todolists-header">
+        <div class="header-content">
+            <h2>{{ project.title }} - To-Do Lists</h2>
+            <div class="breadcrumbs">
+                <a href="{{ url_for('projects') }}">Projects</a> &gt; 
+                <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a> &gt; 
+                <span>To-Do Lists</span>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <a href="{{ url_for('create_project_todolist', project_id=project.id) }}" class="btn btn-primary">Create New To-Do List</a>
+        </div>
+    </div>
+
+    {% if todolists %}
+        <div class="todolist-grid">
+            {% for todolist in todolists %}
+                <div class="todolist-card">
+                    <h3>
+                        <a href="{{ url_for('view_todolist', todolist_id=todolist.id) }}">{{ todolist.title }}</a>
+                    </h3>
+                    
+                    <div class="todolist-meta">
+                        <span class="task-count">{{ todolist.task_ids|length }} tasks</span>
+                        <span class="update-date">Updated: {{ todolist.updated_at.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                    
+                    <!-- Progress bar -->
+                    {% set completed = todolist_progress.get(todolist.id, 0) %}
+                    <div class="card-progress-container">
+                        <div class="card-progress-bar">
+                            <div class="card-progress-fill" style="width: {{ completed }}%"></div>
+                        </div>
+                        <span class="card-progress-label">{{ completed }}% complete</span>
+                    </div>
+                    
+                    <!-- Collaborators -->
+                    {% if todolist_collaborators.get(todolist.id) %}
+                        <div class="todolist-collaborators">
+                            <h4>Collaborating with:</h4>
+                            <div class="collaborator-list">
+                                {% for collaborator in todolist_collaborators.get(todolist.id) %}
+                                    <span class="collaborator-badge">{{ collaborator.username }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="todolist-actions">
+                        <a href="{{ url_for('view_todolist', todolist_id=todolist.id) }}" class="btn-small">View List</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No to-do lists have been created for this project yet.</p>
+            <a href="{{ url_for('create_project_todolist', project_id=project.id) }}" class="btn">Create First To-Do List</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .project-todolists-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .project-todolists-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+    
+    .breadcrumbs {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .breadcrumbs a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+    
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .todolist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .todolist-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .todolist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .todolist-meta {
+        display: flex;
+        justify-content: space-between;
+        margin: 0.5rem 0 1rem;
+        color: #777;
+        font-size: 0.9rem;
+    }
+    
+    .card-progress-container {
+        margin: 10px 0;
+    }
+    
+    .card-progress-bar {
+        height: 8px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .card-progress-fill {
+        height: 100%;
+        background-color: #4caf50;
+        border-radius: 4px;
+        transition: width 0.5s ease-in-out;
+    }
+    
+    .card-progress-label {
+        display: block;
+        text-align: right;
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 2px;
+    }
+    
+    .todolist-collaborators {
+        margin: 1rem 0;
+    }
+    
+    .todolist-collaborators h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+    
+    .collaborator-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .collaborator-badge {
+        background-color: #e1f5fe;
+        color: #0288d1;
+        border-radius: 20px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+    }
+    
+    .todolist-actions {
+        text-align: right;
+        margin-top: 1rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f5f7fa;
+        border-radius: 8px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+</style>
+{% endblock %}

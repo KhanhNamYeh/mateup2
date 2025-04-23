@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Tasks | {{ project.title }} | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="project-tasks-container">
+    <div class="project-tasks-header">
+        <div class="header-content">
+            <h2>{{ project.title }} - Tasks</h2>
+            <div class="breadcrumbs">
+                <a href="{{ url_for('projects') }}">Projects</a> &gt; 
+                <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a> &gt; 
+                <span>Tasks</span>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <a href="{{ url_for('create_task', project_id=project.id) }}" class="btn">Create New Task</a>
+            <a href="{{ url_for('project_todolist', project_id=project.id) }}" class="btn">View To-Do Lists</a>
+        </div>
+    </div>
+
+    <div class="task-filters">
+        <button class="filter-btn active" data-filter="all">All Tasks</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+        <button class="filter-btn" data-filter="in-progress">In Progress</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+        {% if project.owner_id == current_user.id %}
+            <button class="filter-btn" data-filter="my-tasks">Assigned to Me</button>
+            <button class="filter-btn" data-filter="created-by-me">Created by Me</button>
+        {% endif %}
+    </div>
+
+    {% if tasks %}
+        <div class="task-table-container">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                        <tr class="task-row status-{{ task.status }}" 
+                            data-assignee="{{ task.assignee_id }}"
+                            data-creator="{{ task.assigner_id }}"
+                            data-status="{{ task.status }}">
+                            <td>{{ task.title }}</td>
+                            <td>{{ assignees[task.assignee_id].username if task.assignee_id in assignees else 'Unknown' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ task.status }}">{{ task.status }}</span>
+                            </td>
+                            <td>{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'No deadline' }}</td>
+                            <td>
+                                {% if task.assignee_id == current_user.id %}
+                                    <div class="task-actions">
+                                        <form method="post" action="{{ url_for('update_task_status', task_id=task.id) }}">
+                                            {% if task.status == 'pending' %}
+                                                <input type="hidden" name="status" value="accepted">
+                                                <button type="submit" class="btn-small btn-accept">Accept</button>
+                                            {% elif task.status == 'accepted' %}
+                                                <input type="hidden" name="status" value="in_progress">
+                                                <button type="submit" class="btn-small">Start</button>
+                                            {% elif task.status == 'in_progress' %}
+                                                <input type="hidden" name="status" value="completed">
+                                                <button type="submit" class="btn-small btn-complete">Complete</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No tasks have been created for this project yet.</p>
+            <a href="{{ url_for('create_task', project_id=project.id) }}" class="btn">Create First Task</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Task filtering
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const taskRows = document.querySelectorAll('.task-row');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                
+                taskRows.forEach(row => {
+                    const status = row.getAttribute('data-status');
+                    const assignee = row.getAttribute('data-assignee');
+                    const creator = row.getAttribute('data-creator');
+                    
+                    // Show/hide based on filter
+                    if (filter === 'all') {
+                        row.style.display = '';
+                    } else if (filter === 'pending' && status === 'pending') {
+                        row.style.display = '';
+                    } else if (filter === 'in-progress' && (status === 'accepted' || status === 'in_progress')) {
+                        row.style.display = '';
+                    } else if (filter === 'completed' && status === 'completed') {
+                        row.style.display = '';
+                    } else if (filter === 'my-tasks' && assignee === '{{ current_user.id }}') {
+                        row.style.display = '';
+                    } else if (filter === 'created-by-me' && creator === '{{ current_user.id }}') {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .project-tasks-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .project-tasks-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+    
+    .breadcrumbs {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .breadcrumbs a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+    
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .task-filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        background: #f0f0f0;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .filter-btn:hover {
+        background: #e0e0e0;
+    }
+    
+    .filter-btn.active {
+        background: #3498db;
+        color: white;
+    }
+    
+    .task-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .task-table th {
+        text-align: left;
+        padding: 12px;
+        background-color: #f5f7fa;
+        border-bottom: 2px solid #ddd;
+    }
+    
+    .task-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .task-row:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+    
+    .status-pending {
+        background-color: #f39c12;
+        color: white;
+    }
+    
+    .status-accepted, .status-in_progress {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .status-completed {
+        background-color: #2ecc71;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f5f7fa;
+        border-radius: 8px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="projects-container">
+    <div class="projects-header">
+        <h2>Your Projects</h2>
+        <a href="{{ url_for('create_project') }}" class="btn">Create New Project</a>
+    </div>
+
+    {% if projects %}
+        <div class="project-grid">
+            {% for project in projects %}
+                <div class="project-card">
+                    <h3 class="project-title">
+                        <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a>
+                    </h3>
+                    <p class="project-description">{{ project.description|truncate(150) }}</p>
+                    <div class="project-meta">
+                        {% if project.owner_id == current_user.id %}
+                            <span class="project-role owner">Owner</span>
+                        {% else %}
+                            <span class="project-role collaborator">Team Member</span>
+                        {% endif %}
+                        <span class="project-tasks-count">{{ project.tasks|length }} tasks</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>You don't have any projects yet.</p>
+            <a href="{{ url_for('create_project') }}" class="btn">Create Your First Project</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Create To-Do List | {{ project.title }} | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="create-todolist-container">
+    <div class="create-todolist-header">
+        <h2>Create To-Do List for {{ project.title }}</h2>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('projects') }}">Projects</a> &gt; 
+            <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a> &gt; 
+            <a href="{{ url_for('project_todolist', project_id=project.id) }}">To-Do Lists</a> &gt; 
+            <span>Create New</span>
+        </div>
+    </div>
+
+    <div class="todolist-form-container">
+        <form method="post" action="{{ url_for('create_project_todolist', project_id=project.id) }}" class="todolist-form">
+            <div class="form-group">
+                <label for="title">To-Do List Title</label>
+                <input type="text" id="title" name="title" required placeholder="e.g., Sprint Planning, UI Development, etc.">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description (Optional)</label>
+                <textarea id="description" name="description" rows="3" placeholder="Describe the purpose of this to-do list"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Select Collaborators</label>
+                <div class="collaborator-selection">
+                    {% for member in project_members %}
+                        {% if member.id != current_user.id %}
+                            <div class="collaborator-option">
+                                <input type="checkbox" id="collab_{{ member.id }}" name="collaborator_ids" value="{{ member.id }}">
+                                <label for="collab_{{ member.id }}">{{ member.username }}</label>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if project_members|length <= 1 %}
+                    <p class="help-text">No other project members available. <a href="{{ url_for('add_collaborator_form', project_id=project.id) }}">Add team members</a> to your project first.</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create To-Do List</button>
+                <a href="{{ url_for('project_todolist', project_id=project.id) }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .create-todolist-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .create-todolist-header {
+        margin-bottom: 2rem;
+    }
+    
+    .breadcrumbs {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .breadcrumbs a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+    
+    .todolist-form-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-group input[type="text"], 
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+    
+    .collaborator-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 0.5rem;
+    }
+    
+    .collaborator-option {
+        padding: 8px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .collaborator-option input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    
+    .help-text {
+        margin-top: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 2rem;
+    }
+    
+    .btn-secondary {
+        background-color: #e0e0e0;
+        color: #333;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #d0d0d0;
+    }
+</style>
+{% endblock %}

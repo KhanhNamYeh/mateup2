@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="project-detail">
+    <div class="project-header">
+        <h2>{{ project.title }}</h2>
+        <div class="project-meta">
+            <span class="project-owner">Owner: {{ owner.username }}</span>
+        </div>
+    </div>
+
+    <div class="project-actions">
+        <a href="{{ url_for('project_todolist', project_id=project.id) }}" class="btn">To-Do Lists</a>
+        <a href="{{ url_for('project_courses', project_id=project.id) }}" class="btn">Recommended Courses</a>
+        {% if project.owner_id == current_user.id %}
+            <a href="{{ url_for('add_collaborator_form', project_id=project.id) }}" class="btn">Add Team Member</a>
+        {% endif %}
+    </div>
+
+    <div class="project-content">
+        <div class="project-description">
+            <h3>Description</h3>
+            <p>{{ project.description }}</p>
+        </div>
+
+        <div class="project-skills">
+            <h3>Required Skills</h3>
+            {% if project.required_skills %}
+                <ul class="skill-list">
+                    {% for skill in project.required_skills %}
+                        <li class="skill-item">{{ skill }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No specific skills required</p>
+            {% endif %}
+        </div>
+
+        <div class="project-collaborators">
+            <h3>Team Members</h3>
+            <ul class="collaborator-list">
+                <li class="collaborator-item owner">{{ owner.username }} (Owner)</li>
+                {% for collaborator in project.collaborators %}
+                    <li class="collaborator-item">{{ collaborator.username }}</li>
+                {% endfor %}
+            </ul>
+            
+            {% if project.owner_id == current_user.id %}
+                <a href="{{ url_for('add_collaborator_form', project_id=project.id) }}" class="btn-small">Add Team Member</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="project-tasks-summary">
+        <div class="task-header">
+            <h3>To-Do Lists</h3>
+            <a href="{{ url_for('project_todolist', project_id=project.id) }}" class="btn-small">Manage To-Do Lists</a>
+        </div>
+
+        {% if todo_lists %}
+            <div class="todolist-cards-preview">
+                {% for todolist in todo_lists %}
+                    <div class="todolist-preview-card">
+                        <h4 class="todolist-title">{{ todolist.title }}</h4>
+                        <div class="todolist-meta">
+                            <span class="task-count">{{ todolist.task_ids|length }} tasks</span>
+                            {% set completed = todolist_progress.get(todolist.id, 0) %}
+                            <div class="card-progress-container">
+                                <div class="card-progress-bar">
+                                    <div class="card-progress-fill" style="width: {{ completed }}%"></div>
+                                </div>
+                                <span class="card-progress-label">{{ completed }}% complete</span>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('view_todolist', todolist_id=todolist.id) }}" class="btn-small">View</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-state">No to-do lists have been created for this project yet.</p>
+            <a href="{{ url_for('create_project_todolist', project_id=project.id) }}" class="btn-small">Create To-Do List</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .project-actions {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .project-tasks-summary {
+        margin-top: 30px;
+        background-color: #f5f7fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .todolist-cards-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .todolist-preview-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .todolist-preview-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .todolist-title {
+        margin-bottom: 10px;
+    }
+    
+    .todolist-meta {
+        margin-bottom: 15px;
+    }
+    
+    .task-count {
+        display: block;
+        margin-bottom: 8px;
+        color: #666;
+    }
+    
+    .card-progress-container {
+        margin: 10px 0;
+    }
+    
+    .card-progress-bar {
+        height: 6px;
+        background-color: #e0e0e0;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .card-progress-fill {
+        height: 100%;
+        background-color: #4caf50;
+        border-radius: 3px;
+    }
+    
+    .card-progress-label {
+        display: block;
+        text-align: right;
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 2px;
+    }
+</style>
+{% endblock %}

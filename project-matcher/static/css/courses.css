@@ -1,0 +1,121 @@
+/* Common styles for course-related pages */
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.course-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;  /* Ensure consistent height */
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.course-thumbnail {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    margin: 0 auto; /* Center the thumbnail */
+}
+
+.course-thumbnail img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+}
+
+.course-duration {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.course-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;  /* Take remaining space */
+}
+
+.course-title {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.course-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.course-title a:hover {
+    color: #3498db;
+}
+
+.course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.course-category {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.course-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    flex-grow: 1;  /* Push the footer to the bottom */
+}
+
+.course-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;  /* Push to bottom of flex container */
+}
+
+.course-price {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #2ecc71;
+}
+
+/* Course relevance badge */
+.course-relevance {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 1;
+}

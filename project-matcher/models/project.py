@@ -1,10 +1,20 @@
 class Project:
-    def __init__(self, kind, country, name, idea, partner_preferences):
-        self.kind = kind
-        self.country = country
-        self.name = name
-        self.idea = idea
-        self.partner_preferences = partner_preferences
+    def __init__(self, id, title, description, owner_id, required_skills=None):
+        self.id = id
+        self.title = title
+        self.description = description
+        self.owner_id = owner_id
+        self.required_skills = required_skills or []
+        self.collaborators = []
+        self.tasks = []
 
-    def __repr__(self):
-        return f"Project(kind={self.kind}, country={self.country}, name={self.name}, idea={self.idea}, partner_preferences={self.partner_preferences})"
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'owner_id': self.owner_id,
+            'required_skills': self.required_skills,
+            'collaborators': [collab.id for collab in self.collaborators],
+            'tasks': [task.id for task in self.tasks]
+        }

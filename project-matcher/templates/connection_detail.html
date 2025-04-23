@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Connection with {{ other_user.username }} | Project Matcher{% endblock %}
+
+{% block content %}
+<div class="connection-detail-container">
+    <div class="connection-header">
+        <h2>Your Connection with {{ other_user.username }}</h2>
+        <p class="connection-date">Connected since: {{ connection.accepted_at.strftime('%B %d, %Y') }}</p>
+    </div>
+
+    <div class="connection-info card">
+        <div class="user-profile">
+            <div class="profile-header">
+                <h3>{{ other_user.username }}</h3>
+            </div>
+            
+            <div class="profile-skills">
+                <h4>Skills</h4>
+                {% if other_user.skills %}
+                    <ul class="skill-tags">
+                        {% for skill in other_user.skills %}
+                            <li class="skill-tag">{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-info">No skills listed</p>
+                {% endif %}
+            </div>
+            
+            <div class="profile-projects">
+                <h4>Projects</h4>
+                {% if other_user.projects %}
+                    <ul class="project-list">
+                        {% for project in other_user.projects %}
+                            <li>{{ project.title }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-info">No projects</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="collaborative-tasks card">
+        <h3>Create a Collaborative To-Do List</h3>
+        <p class="info-text">Select tasks to include in your collaborative to-do list with {{ other_user.username }}.</p>
+        
+        <form action="{{ url_for('create_connection_todolist', connection_id=connection.id) }}" method="post" class="todolist-form">
+            <div class="suggested-tasks">
+                <h4>Suggested Tasks</h4>
+                <div class="task-selection">
+                    {% for task in suggested_tasks %}
+                        <div class="task-option">
+                            <input type="checkbox" id="task_{{ task.id }}" name="task_ids" value="{{ task.id }}">
+                            <label for="task_{{ task.id }}">
+                                <span class="task-title">{{ task.title }}</span>
+                                <span class="task-description">{{ task.description }}</span>
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="custom-tasks">
+                <h4>Add Custom Tasks</h4>
+                <p class="hint-text">Enter one task per line</p>
+                <textarea name="custom_tasks" rows="5" placeholder="E.g., Brainstorm ideas for new project&#10;Research potential technologies&#10;Create project timeline"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create To-Do List</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .connection-detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .connection-header {
+        margin-bottom: 2rem;
+    }
+    
+    .connection-date {
+        color: #666;
+        font-style: italic;
+    }
+    
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-skills {
+        margin: 1rem 0;
+    }
+    
+    .skill-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        list-style: none;
+        padding: 0;
+    }
+    
+    .skill-tag {
+        background: #e9f2fe;
+        border-radius: 16px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .task-option {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .task-option:hover {
+        background-color: #f5f9ff;
+    }
+    
+    .task-option input {
+        margin-right: 0.75rem;
+    }
+    
+    .task-title {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .task-description {
+        font-size: 0.9rem;
+        color: #666;
+        display: block;
+    }
+    
+    .custom-tasks {
+        margin-top: 2rem;
+    }
+    
+    .hint-text {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 0.5rem;
+    }
+    
+    textarea {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0.75rem;
+        font-family: inherit;
+        resize: vertical;
+    }
+    
+    .form-actions {
+        margin-top: 1.5rem;
+        text-align: right;
+    }
+    
+    .empty-info {
+        color: #999;
+        font-style: italic;
+    }
+</style>
+{% endblock %}

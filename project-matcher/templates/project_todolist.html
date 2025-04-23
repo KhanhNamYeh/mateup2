@@ -1,0 +1,18 @@
+<!-- Update the breadcrumbs to remove references to tasks -->
+
+<div class="project-todolists-header">
+    <div class="header-content">
+        <h2>{{ project.title }} - To-Do Lists</h2>
+        <div class="breadcrumbs">
+            <a href="{{ url_for('projects') }}">Projects</a> &gt; 
+            <a href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a> &gt; 
+            <span>To-Do Lists</span>
+        </div>
+    </div>
+    
+    <div class="header-actions">
+        <a href="{{ url_for('create_project_todolist', project_id=project.id) }}" class="btn btn-primary">Create New To-Do List</a>
+    </div>
+</div>
+
+<!-- ...existing code... -->

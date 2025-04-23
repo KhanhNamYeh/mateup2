@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Register Project | Project Matcher{% endblock %}
+{% block title %}Create Project | Project Matcher{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Register Your Project</h2>
-    <p class="welcome-text">Welcome, {{ current_user.username }}! Let's create your first project.</p>
+<div class="form-container">
+    <h2>Create New Project</h2>
     
     <form method="post" action="{{ url_for('create_project') }}" class="project-form">
         <div class="form-group">
@@ -24,8 +23,8 @@
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Create Project</button>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Skip for Now</a>
+            <button type="submit" class="btn">Create Project</button>
+            <a href="{{ url_for('projects') }}" class="btn-secondary">Cancel</a>
         </div>
     </form>
 </div>

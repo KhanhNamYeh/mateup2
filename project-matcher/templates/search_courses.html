@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/courses.css') }}">
+{% endblock %}
+
+{% block title %}
+    {% if query %}
+        Search Results for "{{ query }}" | Course Marketplace
+    {% elif selected_category %}
+        {{ selected_category }} Courses | Course Marketplace
+    {% else %}
+        Browse Courses | Course Marketplace
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="search-courses-container">
+    <div class="search-courses-header">
+        <div class="header-content">
+            {% if query %}
+                <h2>Search Results for "{{ query }}"</h2>
+            {% elif selected_category %}
+                <h2>{{ selected_category }} Courses</h2>
+            {% else %}
+                <h2>Browse All Courses</h2>
+            {% endif %}
+        </div>
+        
+        <div class="header-actions">
+            <form action="{{ url_for('search_courses') }}" method="get" class="search-form">
+                <input type="text" name="q" placeholder="Search courses..." value="{{ query }}">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <div class="category-filter">
+        <span class="filter-label">Browse by Category:</span>
+        <div class="category-pills">
+            <a href="{{ url_for('search_courses') }}" class="category-pill {% if not selected_category %}active{% endif %}">All</a>
+            {% for category in all_categories %}
+                <a href="{{ url_for('search_courses', category=category) }}" class="category-pill {% if selected_category == category %}active{% endif %}">
+                    {{ category }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if courses %}
+        <div class="search-results">
+            <p class="results-count">{{ courses|length }} course{% if courses|length != 1 %}s{% endif %} found</p>
+            
+            <div class="courses-grid">
+                {% for course in courses %}
+                    <div class="course-card">
+                        <div class="course-thumbnail">
+                            <img src="{{ url_for('static', filename='images/courses/' + course.thumbnail_url) }}" 
+                                 alt="{{ course.title }}" 
+                                 width="300" 
+                                 height="300" 
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text={{ course.title|urlencode }}'; this.alt='{{ course.title }}';">
+                            <div class="course-duration"><i class="far fa-clock"></i> {{ course.duration }} hours</div>
+                        </div>
+                        <div class="course-info">
+                            <h4 class="course-title">
+                                <a href="{{ url_for('course_detail', course_id=course.id) }}">{{ course.title }}</a>
+                            </h4>
+                            <div class="course-meta">
+                                <span class="course-category">{{ course.category }}</span>
+                                <div class="course-rating">
+                                    <span class="stars">
+                                        {% for i in range(5) %}
+                                            {% if i < course.rating|int %}
+                                                <i class="fas fa-star"></i>
+                                            {% elif i < course.rating|round(0, 'ceil') %}
+                                                <i class="fas fa-star-half-alt"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="rating-value">{{ course.rating }}</span>
+                                    <span class="student-count">({{ course.student_count }})</span>
+                                </div>
+                            </div>
+                            <p class="course-description">{{ course.description|truncate(100) }}</p>
+                            <div class="course-footer">
+                                <span class="course-price">${{ course.price }}</span>
+                                <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn-small">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            {% if query %}
+                <p>No courses found matching "{{ query }}".</p>
+            {% elif selected_category %}
+                <p>No courses found in the {{ selected_category }} category.</p>
+            {% else %}
+                <p>No courses available at the moment.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .search-courses-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .search-courses-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .search-form {
+        display: flex;
+    }
+    
+    .search-form input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        width: 250px;
+    }
+    
+    .search-btn {
+        padding: 8px 12px;
+        background: #3498db;
+        color: white;
+        border: 1px solid #3498db;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+    }
+    
+    .category-filter {
+        margin-bottom: 2rem;
+    }
+    
+    .filter-label {
+        font-weight: 500;
+        margin-right: 1rem;
+    }
+    
+    .category-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 0.5rem;
+    }
+    
+    .category-pill {
+        padding: 6px 12px;
+        background-color: #f0f0f0;
+        border-radius: 20px;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .category-pill:hover, .category-pill.active {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .results-count {
+        margin-bottom: 1rem;
+        color: #666;
+    }
+    
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+    
+    .course-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .course-thumbnail {
+        position: relative;
+        height: 180px;  /* Increased height */
+        overflow: hidden;
+        background-color: #f5f5f5;  /* Background color for missing images */
+    }
+    
+    .course-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;  /* Maintain aspect ratio but ensure full coverage */
+        object-position: center;  /* Center the image */
+    }
+    
+    .course-duration {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background-color: rgba(0,0,0,0.7);
+        color: white;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+    
+    .course-info {
+        padding: 15px;
+    }
+    
+    .course-title {
+        margin-bottom: 8px;
+    }
+    
+    .course-title a {
+        color: #333;
+        text-decoration: none;
+    }
+    
+    .course-title a:hover {
+        color: #3498db;
+    }
+    
+    .course-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .course-category {
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .course-rating {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .stars {
+        color: #f39c12;
+        margin-right: 5px;
+    }
+    
+    .rating-value {
+        font-weight: 500;
+    }
+    
+    .student-count {
+        color: #666;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+    
+    .course-description {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+    
+    .course-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .course-price {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #2ecc71;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f5f7fa;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
